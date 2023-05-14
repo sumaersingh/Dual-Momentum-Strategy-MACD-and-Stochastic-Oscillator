@@ -1,0 +1,30 @@
+//@version=4
+strategy("MACD and Stochastic Strategy", overlay=true)
+
+// Input parameters
+macdShort = input(12, title="MACD Short Period")
+macdLong = input(26, title="MACD Long Period")
+macdSignal = input(9, title="MACD Signal Period")
+stoK = input(14, title="Stochastic K Period")
+stoD = input(3, title="Stochastic D Period")
+
+// Calculate indicators
+[macdLine, signalLine, _] = macd(close, macdShort, macdLong, macdSignal)
+[stoKLine, stoDLine] = stoch(high, low, close, stoK, stoD)
+
+// Define entry and exit conditions
+longCondition = crossover(macdLine, signalLine) and crossover(stoKLine, stoDLine)
+if (longCondition)
+    strategy.entry("Buy", strategy.long)
+
+shortCondition = crossunder(macdLine, signalLine) and crossunder(stoKLine, stoDLine)
+if (shortCondition)
+    strategy.entry("Sell", strategy.short)
+
+// Plotting
+plot(macdLine - signalLine, "MACD Histogram", color=color.blue, style=plot.style_histogram)
+hline(0, "Zero Line", color=color.gray)
+plot(stoKLine, "Stochastic K Line", color=color.red)
+plot(stoDLine, "Stochastic D Line", color=color.green)
+hline(80, "Overbought Level", color=color.red)
+hline(20, "Oversold Level", color=color.green)
